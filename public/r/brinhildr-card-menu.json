@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "brinhildr-card-menu",
+  "title": "Dashboard Card Menu",
+  "author": "Brinhildr <https://github.com/your-username>",
+  "description": "A shadcn dropdown menu that exports a dashboard card's data as CSV.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "button",
+    "dropdown-menu"
+  ],
+  "files": [
+    {
+      "path": "src/components/dashboard/card-menu.tsx",
+      "content": "\"use client\";\n\nimport { MoreVertical } from \"lucide-react\";\nimport { Button } from \"@/components/ui/button\";\nimport {\n  DropdownMenu,\n  DropdownMenuContent,\n  DropdownMenuItem,\n  DropdownMenuTrigger,\n} from \"@/components/ui/dropdown-menu\";\nimport { downloadCsv } from \"@/lib/dashboard-utils\";\n\ntype CardMenuProps = {\n  filename: string;\n  headers: string[];\n  rows: Array<Array<string | number>>;\n};\n\nexport function CardMenu({ filename, headers, rows }: CardMenuProps) {\n  return (\n    <DropdownMenu>\n      <DropdownMenuTrigger\n        render={\n          <Button\n            variant=\"ghost\"\n            size=\"icon-xs\"\n            className=\"size-[clamp(24px,3.1vw,36px)]\"\n            aria-label=\"Open card menu\"\n          />\n        }\n      >\n        <MoreVertical className=\"size-[clamp(14px,1.4vw,16px)] text-white/45\" />\n      </DropdownMenuTrigger>\n      <DropdownMenuContent\n        align=\"end\"\n        className=\"min-w-36 bg-[#252525] text-white\"\n      >\n        <DropdownMenuItem onClick={() => downloadCsv(filename, headers, rows)}>\n          Download CSV\n        </DropdownMenuItem>\n      </DropdownMenuContent>\n    </DropdownMenu>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "@components/dashboard/card-menu.tsx"
+    },
+    {
+      "path": "src/lib/dashboard-utils.ts",
+      "content": "export function downloadCsv(\n  filename: string,\n  headers: string[],\n  rows: Array<Array<string | number>>,\n) {\n  const csv = [headers, ...rows]\n    .map((row) =>\n      row\n        .map((value) => `\"${String(value).replaceAll('\"', '\"\"')}\"`)\n        .join(\",\"),\n    )\n    .join(\"\\n\");\n  const url = URL.createObjectURL(new Blob([csv], { type: \"text/csv\" }));\n  const link = document.createElement(\"a\");\n  link.href = url;\n  link.download = filename;\n  link.click();\n  URL.revokeObjectURL(url);\n}\n",
+      "type": "registry:lib",
+      "target": "@lib/dashboard-utils.ts"
+    }
+  ],
+  "type": "registry:component"
+}

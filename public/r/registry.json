@@ -1,0 +1,267 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "brinhildr",
+  "homepage": "https://github.com/your-username/brinhildr-dashboard",
+  "items": [
+    {
+      "name": "brinhildr-dashboard",
+      "type": "registry:block",
+      "title": "Brinhildr Commerce Dashboard",
+      "description": "A responsive dark commerce analytics dashboard with sales and earnings charts, top products, country sales, and category breakdown.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react", "recharts"],
+      "registryDependencies": [
+        "avatar",
+        "button",
+        "card",
+        "dropdown-menu",
+        "input",
+        "select",
+        "sheet"
+      ],
+      "categories": ["dashboard", "analytics", "ecommerce"],
+      "files": [
+        {
+          "path": "src/app/page.tsx",
+          "type": "registry:page",
+          "target": "app/page.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/dashboard.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/components/dashboard/sales-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/sales-chart.tsx"
+        },
+        {
+          "path": "src/components/dashboard/earnings-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/earnings-chart.tsx"
+        },
+        {
+          "path": "src/components/dashboard/top-products.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/top-products.tsx"
+        },
+        {
+          "path": "src/components/dashboard/country-sales.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/country-sales.tsx"
+        },
+        {
+          "path": "src/components/dashboard/category-breakdown.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/category-breakdown.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-utils",
+      "type": "registry:lib",
+      "title": "Dashboard CSV Utility",
+      "description": "Small browser-side CSV download helper used by the dashboard card export menus.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "files": [
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-card-menu",
+      "type": "registry:component",
+      "title": "Dashboard Card Menu",
+      "description": "A shadcn dropdown menu that exports a dashboard card's data as CSV.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-sales-chart",
+      "type": "registry:component",
+      "title": "Sales Analytics Chart",
+      "description": "A responsive multi-series area chart with the dashboard's signature earnings, orders, and visitors palette.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react", "recharts"],
+      "registryDependencies": ["button", "card", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/sales-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/sales-chart.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-earnings-chart",
+      "type": "registry:component",
+      "title": "Earnings Bar Chart",
+      "description": "A responsive gradient earnings bar chart with date filtering and CSV export.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react", "recharts"],
+      "registryDependencies": ["button", "card", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/earnings-chart.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/earnings-chart.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-top-products",
+      "type": "registry:component",
+      "title": "Top Products List",
+      "description": "A searchable top-selling products card with rankings, product photography, and CSV export.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "card", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/top-products.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/top-products.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-country-sales",
+      "type": "registry:component",
+      "title": "Country Sales Card",
+      "description": "A country sales ranking with flags, proportion bars, and CSV export.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "card", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/country-sales.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/country-sales.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    },
+    {
+      "name": "brinhildr-category-breakdown",
+      "type": "registry:component",
+      "title": "Category Breakdown Card",
+      "description": "A compact category-share donut with color-matched legend and CSV export.",
+      "author": "Brinhildr <https://github.com/your-username>",
+      "dependencies": ["lucide-react"],
+      "registryDependencies": ["button", "card", "dropdown-menu"],
+      "files": [
+        {
+          "path": "src/components/dashboard/category-breakdown.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/category-breakdown.tsx"
+        },
+        {
+          "path": "src/components/dashboard/dashboard.css",
+          "type": "registry:file",
+          "target": "@components/dashboard/dashboard.css"
+        },
+        {
+          "path": "src/components/dashboard/card-menu.tsx",
+          "type": "registry:component",
+          "target": "@components/dashboard/card-menu.tsx"
+        },
+        {
+          "path": "src/lib/dashboard-utils.ts",
+          "type": "registry:lib",
+          "target": "@lib/dashboard-utils.ts"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "brinhildr-utils",
+  "title": "Dashboard CSV Utility",
+  "author": "Brinhildr <https://github.com/your-username>",
+  "description": "Small browser-side CSV download helper used by the dashboard card export menus.",
+  "files": [
+    {
+      "path": "src/lib/dashboard-utils.ts",
+      "content": "export function downloadCsv(\n  filename: string,\n  headers: string[],\n  rows: Array<Array<string | number>>,\n) {\n  const csv = [headers, ...rows]\n    .map((row) =>\n      row\n        .map((value) => `\"${String(value).replaceAll('\"', '\"\"')}\"`)\n        .join(\",\"),\n    )\n    .join(\"\\n\");\n  const url = URL.createObjectURL(new Blob([csv], { type: \"text/csv\" }));\n  const link = document.createElement(\"a\");\n  link.href = url;\n  link.download = filename;\n  link.click();\n  URL.revokeObjectURL(url);\n}\n",
+      "type": "registry:lib",
+      "target": "@lib/dashboard-utils.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

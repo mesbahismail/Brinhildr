@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+.dashboard-sidebar,
+.dashboard-content,
+.dashboard-toolbar {
+  font-family: Poppins, var(--font-poppins, Arial), sans-serif;
+}
+
+.dashboard-sidebar {
+  width: clamp(152px, 20.4vw, 235px);
+}
+
+.dashboard-content {
+  padding-inline: clamp(20px, 2.6vw, 30px);
+}
+
+.dashboard-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: clamp(40px, 5.2vw, 60px);
+  background: rgb(21 21 21 / 96%);
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-page-heading {
+  min-height: clamp(31px, 4vw, 46px);
+  margin-top: clamp(0px, calc(4.7vw - 36px), 18px);
+  margin-bottom: clamp(10px, 1.3vw, 15px);
+  font-size: clamp(18px, 2.43vw, 28px);
+}
+
+.dashboard-grid {
+  gap: clamp(16px, 2.08vw, 24px);
+  padding-bottom: clamp(24px, 3vw, 36px);
+}
+
+.dashboard-sales-card {
+  height: clamp(204px, calc(35.7vw - 70px), 341px);
+}
+
+.dashboard-secondary-card {
+  height: clamp(204px, calc(23.2vw + 25.8px), 293px);
+}
+
+.dashboard-tertiary-card {
+  height: clamp(204px, calc(28.4vw - 14px), 313px);
+}
+
+.dashboard-card-header {
+  padding: clamp(14px, 1.8vw, 21px) clamp(16px, 2.2vw, 25px) 0;
+}
+
+.dashboard-card-title {
+  font-size: clamp(13px, 1.7vw, 20px);
+}
+
+.dashboard-sales-content {
+  min-height: clamp(165px, calc(25.4vw - 30px), 263px);
+  gap: clamp(8px, 1.3vw, 15px);
+  padding: clamp(4px, 0.6vw, 7px) clamp(12px, 1.6vw, 18px)
+    clamp(8px, 1vw, 12px);
+}
+
+.dashboard-sales-metrics {
+  width: clamp(86px, 11.2vw, 129px);
+}
+
+.dashboard-sales-metric {
+  min-height: clamp(47px, 6.1vw, 70px);
+}
+
+.dashboard-sales-value {
+  font-size: clamp(11px, 1.3vw, 15px);
+}
+
+.dashboard-sales-label {
+  font-size: clamp(8px, 0.95vw, 11px);
+}
+
+.dashboard-earnings-chart {
+  height: clamp(180px, 21.8vw, 251px);
+  padding: clamp(17px, 2.2vw, 25px) clamp(12px, 1.6vw, 18px)
+    clamp(12px, 1.6vw, 18px);
+}
+
+.dashboard-products-content,
+.dashboard-country-content {
+  padding: clamp(4px, 0.6vw, 7px) clamp(16px, 2.2vw, 25px)
+    clamp(8px, 1vw, 12px);
+}
+
+.dashboard-product-row {
+  height: clamp(43px, 5vw, 58px);
+  gap: clamp(8px, 1vw, 12px);
+}
+
+.dashboard-product-image {
+  width: clamp(34px, 4.4vw, 51px);
+  height: clamp(34px, 4.4vw, 51px);
+}
+
+.dashboard-product-name {
+  font-size: clamp(10px, 1.2vw, 14px);
+  line-height: 1.35;
+}
+
+.dashboard-product-detail {
+  font-size: clamp(9px, 1vw, 12px);
+}
+
+.dashboard-product-purchases,
+.dashboard-country-sales {
+  font-size: clamp(9px, 1.15vw, 13px);
+}
+
+.dashboard-country-row {
+  height: clamp(39px, 5vw, 58px);
+}
+
+.dashboard-country-row-content {
+  height: calc(clamp(39px, 5vw, 58px) - 2px);
+}
+
+.dashboard-country-name {
+  font-size: clamp(10px, 1.2vw, 14px);
+}
+
+.dashboard-category-content {
+  min-height: clamp(164px, 21.5vw, 248px);
+  padding: clamp(4px, 0.6vw, 7px) clamp(16px, 2.2vw, 25px)
+    clamp(8px, 1vw, 12px);
+}
+
+.dashboard-category-donut {
+  width: clamp(124px, 16.2vw, 186px);
+  height: clamp(124px, 16.2vw, 186px);
+}
+
+.dashboard-category-hole {
+  inset: clamp(34px, 4.4vw, 51px);
+}
+
+.dashboard-category-legend-item {
+  height: clamp(32px, 4.2vw, 48px);
+  gap: clamp(8px, 1vw, 12px);
+}
+
+.dashboard-category-label {
+  font-size: clamp(10px, 1.2vw, 14px);
+}
+
+@media (max-width: 639px) {
+  .dashboard-content {
+    padding-inline: 16px;
+  }
+}
