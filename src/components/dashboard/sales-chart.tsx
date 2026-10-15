@@ -35,7 +35,7 @@ const ticks = ["$3k", "$2.5k", "$2k", "$1.5k", "$1k", "$500", "$0"];
 
 export function SalesChart({ period }: { period: string }) {
   const multiplier =
-    period === "Last 7 days" ? 0.48 : period === "This month" ? 1.08 : period === "Last year" ? 1.24 : 1;
+    period === "Today" ? 0.32 : period === "Last Week" ? 0.48 : period === "Last 90 Days" ? 1.08 : period === "Last Year" ? 1.24 : 1;
   const chartData = sales.map((point) => ({
     ...point,
     earning: Math.round(point.earning * multiplier),
@@ -72,7 +72,7 @@ export function SalesChart({ period }: { period: string }) {
                 style={{ borderColor: metric.color }}
               />
               <div className="min-w-0">
-                <div className="dashboard-sales-value leading-4 text-white">{metric.value}</div>
+                <div className="dashboard-sales-value leading-4 font-semibold text-white">{metric.value}</div>
                 <div className="dashboard-sales-label leading-3 text-white/45">{metric.label}</div>
               </div>
             </div>
@@ -98,7 +98,7 @@ export function SalesChart({ period }: { period: string }) {
               <CartesianGrid stroke="rgba(255,255,255,.09)" vertical />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "rgba(255,255,255,.42)", fontSize: 7 }}
+                tick={{ fill: "rgba(255,255,255,.5)", fontSize: 8, fontWeight: 600 }}
                 tickLine={false}
                 axisLine={{ stroke: "rgba(255,255,255,.14)" }}
                 interval={1}
@@ -108,7 +108,7 @@ export function SalesChart({ period }: { period: string }) {
                 orientation="left"
                 ticks={[0, 5, 10, 15, 20, 25, 30]}
                 tickFormatter={(value) => ticks[6 - Math.round(value / 5)]}
-                tick={{ fill: "rgba(255,255,255,.4)", fontSize: 7 }}
+                tick={{ fill: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
                 width={30}

@@ -10,29 +10,188 @@
   width: clamp(152px, 20.4vw, 235px);
 }
 
+.dashboard-shell {
+  width: calc(100vw / 1.1);
+  min-height: calc(100vh / 1.1);
+  transform: scale(1.1);
+  transform-origin: top left;
+}
+
+/* Floats 12px off the viewport edges; height is pre-divided by the 1.1 scale. */
+.dashboard-sidebar-rail {
+  height: calc((100vh - 24px) / 1.1);
+  transform: scale(1.1);
+  transform-origin: top left;
+}
+
+.dashboard-sidebar-panel {
+  box-shadow:
+    0 18px 48px rgb(0 0 0 / 50%),
+    0 2px 10px rgb(0 0 0 / 35%);
+  scrollbar-width: none;
+}
+
 .dashboard-content {
-  padding-inline: clamp(20px, 2.6vw, 30px);
+  padding-inline: clamp(20px, calc(2vw + 4px), 28px);
 }
 
 .dashboard-toolbar {
   position: sticky;
   top: 0;
   z-index: 30;
-  height: clamp(40px, 5.2vw, 60px);
+  height: clamp(44px, 5vw, 56px);
   background: rgb(21 21 21 / 96%);
   backdrop-filter: blur(10px);
 }
 
-.dashboard-page-heading {
-  min-height: clamp(31px, 4vw, 46px);
-  margin-top: clamp(0px, calc(4.7vw - 36px), 18px);
-  margin-bottom: clamp(10px, 1.3vw, 15px);
-  font-size: clamp(18px, 2.43vw, 28px);
+.dashboard-chat-dock {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  z-index: 20;
+  height: calc(100vh / 1.1);
+  min-width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-left: 1px solid rgb(255 255 255 / 8%);
+  transition:
+    width 220ms ease,
+    flex-basis 220ms ease,
+    border-color 220ms ease;
+}
+
+.dashboard-chat-dock[data-open="false"] {
+  border-left-color: transparent;
+}
+
+.dashboard-chat-dock.is-resizing {
+  transition: none;
+}
+
+.dashboard-chat-resize:hover span,
+.dashboard-chat-dock.is-resizing .dashboard-chat-resize span {
+  background: rgb(243 81 119 / 70%);
+}
+
+.dashboard-toolbar-title {
+  font-size: clamp(16px, 1.9vw, 24px);
+}
+
+.dashboard-toolbar .dashboard-period-trigger,
+.dashboard-toolbar .dashboard-period-trigger [data-slot="select-value"] {
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .dashboard-grid {
-  gap: clamp(16px, 2.08vw, 24px);
-  padding-bottom: clamp(24px, 3vw, 36px);
+  gap: clamp(20px, calc(2vw + 4px), 28px);
+  margin-top: clamp(4px, 1vw, 12px);
+  padding-bottom: var(--space-6);
+}
+
+.dashboard-grid [data-slot="card"] {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgb(255 255 255 / 8%);
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+}
+
+.dashboard-grid [data-slot="card"]::before,
+.dashboard-grid [data-slot="card"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.dashboard-grid [data-slot="card"]::before {
+  z-index: -1;
+  background: radial-gradient(
+    480px circle at var(--pointer-x) var(--pointer-y),
+    rgb(255 255 255 / 7%),
+    transparent 48%
+  );
+}
+
+.dashboard-grid [data-slot="card"]::after {
+  z-index: 2;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: radial-gradient(
+      420px circle at var(--pointer-x) var(--pointer-y),
+      rgb(255 255 255 / 36%),
+      transparent 48%
+    )
+    border-box;
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.dashboard-grid [data-slot="card"]:hover::before,
+.dashboard-grid [data-slot="card"]:hover::after {
+  opacity: 1;
+}
+
+.dashboard-panel-card {
+  border-width: 1px;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+/* The AI chat fills the viewport under the toolbar; only the thread scrolls. */
+.dashboard-shell[data-page="ai-chat"] .dashboard-content {
+  display: flex;
+  height: calc(100dvh / 1.1);
+  flex-direction: column;
+}
+
+.dashboard-ai-page {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.dashboard-ai-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 16px, #000 calc(100% - 24px), transparent);
+}
+
+.dashboard-ai-thread {
+  display: flex;
+  min-height: 100%;
+  width: min(100%, 960px);
+  flex-direction: column;
+  margin-inline: auto;
+}
+
+.dashboard-ai-thread > div {
+  flex: 1;
+}
+
+.dashboard-ai-composer {
+  display: flex;
+  width: min(100%, 1000px);
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+  margin: 8px auto 0;
+}
+
+.dashboard-ai-note {
+  margin: 8px 0 12px;
+  text-align: center;
+  font-size: 10px;
+  color: rgb(255 255 255 / 35%);
 }
 
 .dashboard-sales-card {
@@ -48,7 +207,7 @@
 }
 
 .dashboard-card-header {
-  padding: clamp(14px, 1.8vw, 21px) clamp(16px, 2.2vw, 25px) 0;
+  padding: clamp(16px, 1.8vw, 24px) clamp(16px, 2vw, 24px) 0;
 }
 
 .dashboard-card-title {
@@ -57,9 +216,9 @@
 
 .dashboard-sales-content {
   min-height: clamp(165px, calc(25.4vw - 30px), 263px);
-  gap: clamp(8px, 1.3vw, 15px);
-  padding: clamp(4px, 0.6vw, 7px) clamp(12px, 1.6vw, 18px)
-    clamp(8px, 1vw, 12px);
+  gap: clamp(8px, 1.25vw, 16px);
+  padding: clamp(4px, 0.5vw, 8px) clamp(12px, 1.5vw, 16px)
+    var(--space-3);
 }
 
 .dashboard-sales-metrics {
@@ -71,7 +230,7 @@
 }
 
 .dashboard-sales-value {
-  font-size: clamp(11px, 1.3vw, 15px);
+  font-size: clamp(12px, 1.45vw, 17px);
 }
 
 .dashboard-sales-label {
@@ -80,14 +239,12 @@
 
 .dashboard-earnings-chart {
   height: clamp(180px, 21.8vw, 251px);
-  padding: clamp(17px, 2.2vw, 25px) clamp(12px, 1.6vw, 18px)
-    clamp(12px, 1.6vw, 18px);
+  padding: var(--space-6) clamp(12px, 1.5vw, 16px) var(--space-4);
 }
 
 .dashboard-products-content,
 .dashboard-country-content {
-  padding: clamp(4px, 0.6vw, 7px) clamp(16px, 2.2vw, 25px)
-    clamp(8px, 1vw, 12px);
+  padding: clamp(4px, 0.5vw, 8px) clamp(16px, 2vw, 24px) var(--space-3);
 }
 
 .dashboard-product-row {
@@ -128,8 +285,7 @@
 
 .dashboard-category-content {
   min-height: clamp(164px, 21.5vw, 248px);
-  padding: clamp(4px, 0.6vw, 7px) clamp(16px, 2.2vw, 25px)
-    clamp(8px, 1vw, 12px);
+  padding: clamp(4px, 0.5vw, 8px) clamp(16px, 2vw, 24px) var(--space-3);
 }
 
 .dashboard-category-donut {
@@ -152,6 +308,25 @@
 
 @media (max-width: 639px) {
   .dashboard-content {
-    padding-inline: 16px;
+    padding-inline: 20px;
   }
+
+  .dashboard-toolbar {
+    height: auto;
+    padding-block: 8px;
+  }
+
+  .dashboard-chat-dock[data-open="true"] {
+    width: 100% !important;
+    flex-basis: 100% !important;
+  }
+
+  .dashboard-chat-resize {
+    display: none;
+  }
+
+  .dashboard-shell[data-chat-open="true"] > main {
+    display: none;
+  }
+
 }

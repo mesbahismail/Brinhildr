@@ -25,7 +25,7 @@ const ticks = ["$0", "$500", "$1k", "$1.5k", "$2k", "$2.5k", "$3k"];
 
 export function EarningsChart({ period }: { period: string }) {
   const multiplier =
-    period === "Last 7 days" ? 0.48 : period === "This month" ? 1.08 : period === "Last year" ? 1.24 : 1;
+    period === "Today" ? 0.32 : period === "Last Week" ? 0.48 : period === "Last 90 Days" ? 1.08 : period === "Last Year" ? 1.24 : 1;
   const chartData = data.map((point) => ({
     ...point,
     amount: Number((point.amount * multiplier).toFixed(2)),
@@ -53,7 +53,7 @@ export function EarningsChart({ period }: { period: string }) {
             <CartesianGrid stroke="rgba(255,255,255,.09)" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "rgba(255,255,255,.4)", fontSize: 7 }}
+              tick={{ fill: "rgba(255,255,255,.5)", fontSize: 8, fontWeight: 600 }}
               tickLine={false}
               axisLine={false}
               tickMargin={5}
@@ -62,7 +62,7 @@ export function EarningsChart({ period }: { period: string }) {
               domain={[0, 3.6]}
               ticks={[0, 0.6, 1.2, 1.8, 2.4, 3, 3.6]}
               tickFormatter={(value) => ticks[Math.round(value / 0.6)]}
-              tick={{ fill: "rgba(255,255,255,.38)", fontSize: 7 }}
+              tick={{ fill: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 600 }}
               tickLine={false}
               axisLine={false}
               width={33}
