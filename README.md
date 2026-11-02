@@ -60,7 +60,7 @@ listing.
 
 For directory submission:
 
-- Publish the source under the included MIT license (confirm the copyright holder text) and make the repository publicly accessible.
+- Publish the source under the included license and make the repository publicly accessible.
 - Replace the `your-username` homepage and author placeholders with the public repository and maintainer details.
 - Host a valid, schema-compliant flat registry with `/registry.json` and each item manifest at the registry root; registry source `files` entries must not contain `content`.
 - Add the registry entry to `apps/v4/registry/directory.json` in the shadcn/ui repository, run `pnpm validate:registries`, and open a pull request for review.
