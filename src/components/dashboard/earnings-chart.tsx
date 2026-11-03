@@ -4,7 +4,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -12,6 +11,8 @@ import {
 import "./dashboard.css";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CardMenu } from "@/components/dashboard/card-menu";
+import { ChartFrame } from "@/components/dashboard/chart-frame";
+import { periodMultiplier } from "@/lib/dashboard-utils";
 
 const data = [
   { date: "1 APR", amount: 2.4 },
@@ -24,8 +25,7 @@ const data = [
 const ticks = ["$0", "$500", "$1k", "$1.5k", "$2k", "$2.5k", "$3k"];
 
 export function EarningsChart({ period }: { period: string }) {
-  const multiplier =
-    period === "Last 7 days" ? 0.48 : period === "This month" ? 1.08 : period === "Last year" ? 1.24 : 1;
+  const multiplier = periodMultiplier(period);
   const chartData = data.map((point) => ({
     ...point,
     amount: Number((point.amount * multiplier).toFixed(2)),
@@ -42,8 +42,9 @@ export function EarningsChart({ period }: { period: string }) {
         />
       </div>
       <div className="dashboard-earnings-chart">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+        <ChartFrame>
+          {({ width, height }) => (
+          <BarChart width={width} height={height} data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="earnings-bars" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#ff8a58" />
@@ -53,7 +54,7 @@ export function EarningsChart({ period }: { period: string }) {
             <CartesianGrid stroke="rgba(255,255,255,.09)" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "rgba(255,255,255,.4)", fontSize: 7 }}
+              tick={{ fill: "rgba(255,255,255,.5)", fontSize: 8, fontWeight: 600 }}
               tickLine={false}
               axisLine={false}
               tickMargin={5}
@@ -62,10 +63,10 @@ export function EarningsChart({ period }: { period: string }) {
               domain={[0, 3.6]}
               ticks={[0, 0.6, 1.2, 1.8, 2.4, 3, 3.6]}
               tickFormatter={(value) => ticks[Math.round(value / 0.6)]}
-              tick={{ fill: "rgba(255,255,255,.38)", fontSize: 7 }}
+              tick={{ fill: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 600 }}
               tickLine={false}
               axisLine={false}
-              width={33}
+              width={36}
             />
             <Tooltip
               cursor={{ fill: "rgba(255,255,255,.04)" }}
@@ -84,7 +85,8 @@ export function EarningsChart({ period }: { period: string }) {
               animationDuration={650}
             />
           </BarChart>
-        </ResponsiveContainer>
+          )}
+        </ChartFrame>
       </div>
     </Card>
   );

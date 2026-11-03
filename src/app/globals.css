@@ -42,6 +42,14 @@
 
 :root {
   color-scheme: dark;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
   --background: #151515;
   --foreground: #f5f5f5;
   --card: #252525;

@@ -24,21 +24,23 @@ export function CategoryBreakdown() {
           rows={chartRows}
         />
       </div>
-      <div className="dashboard-category-content flex items-center justify-around gap-[clamp(16px,2vw,23px)]">
-        <div
-          className="dashboard-category-donut relative shrink-0 rounded-full"
-          style={{
-            background:
-              "conic-gradient(from 0deg, #2fe4c0 0 16%, #398df7 16% 45%, #8748f5 45% 73%, #f35177 73% 100%)",
-          }}
-          role="img"
-          aria-label="Category sales share: Dresses 27%, Shoes 16%, Accessories 29%, Tops 28%"
-        >
-          <div className="dashboard-category-hole absolute rounded-full bg-[#222] shadow-[inset_0_2px_7px_rgba(0,0,0,.6)]" />
+      <div className="dashboard-category-content grid grid-cols-2 items-center">
+        <div className="flex min-w-0 items-center justify-center">
+          <div
+            className="dashboard-category-donut relative shrink-0 rounded-full"
+            style={{
+              background:
+                "conic-gradient(from 0deg, #2fe4c0 0 16%, #398df7 16% 45%, #8748f5 45% 73%, #f35177 73% 100%)",
+            }}
+            role="img"
+            aria-label="Category sales share: Dresses 27%, Shoes 16%, Accessories 29%, Tops 28%"
+          >
+            <div className="dashboard-category-hole absolute rounded-full bg-[#222] shadow-[inset_0_2px_7px_rgba(0,0,0,.6)]" />
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
+        <ul className="dashboard-category-legend min-w-0">
           {categories.map((category) => (
-            <div
+            <li
               key={category.name}
               className="dashboard-category-legend-item flex items-center border-b border-white/[.07] last:border-0"
             >
@@ -46,10 +48,15 @@ export function CategoryBreakdown() {
                 className="size-[10px] shrink-0 rounded-full"
                 style={{ backgroundColor: category.color }}
               />
-              <span className="dashboard-category-label truncate text-white/90">{category.name}</span>
-            </div>
+              <span className="dashboard-category-label min-w-0 flex-1 truncate text-white/90">
+                {category.name}
+              </span>
+              <span className="dashboard-category-share shrink-0 tabular-nums text-white/45">
+                {category.value}%
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </Card>
   );
