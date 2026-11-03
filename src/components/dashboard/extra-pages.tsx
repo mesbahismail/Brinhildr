@@ -17,6 +17,7 @@ import {
   Warehouse,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PageTitleBar } from "@/components/dashboard/page-kit";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -93,13 +94,13 @@ export function InventoryPage({
 
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <div className="flex items-center gap-2">
           <Button onClick={() => setCreateOpen((open) => !open)} className="h-8 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-3 text-xs text-white">
             <Plus className="size-3.5" /> New
           </Button>
         </div>
-      </div>
+      </PageTitleBar>
       {createOpen && (
         <form onSubmit={createProduct} className="mb-4 flex items-center gap-2 rounded-xl border border-white/[.08] bg-[#222] p-3">
           <Input aria-label="New product name" autoFocus value={newProductName} onChange={(event) => setNewProductName(event.target.value)} placeholder="Product name" className="h-9 max-w-sm border-white/[.12] bg-[#191919] text-sm" />
@@ -181,11 +182,11 @@ export function SellersPage({
 
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <div className="flex items-center gap-2">
           <Button onClick={() => setCreateOpen((open) => !open)} className="h-8 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-3 text-xs text-white"><Plus className="size-3.5" /> New</Button>
         </div>
-      </div>
+      </PageTitleBar>
       {createOpen && (
         <form onSubmit={createSeller} className="mb-4 flex items-center gap-2 rounded-xl border border-white/[.08] bg-[#222] p-3">
           <Input aria-label="New manufacturer name" autoFocus value={newSellerName} onChange={(event) => setNewSellerName(event.target.value)} placeholder="Manufacturer name" className="h-9 max-w-sm border-white/[.12] bg-[#191919] text-sm" />

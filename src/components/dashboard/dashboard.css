@@ -10,18 +10,26 @@
   width: clamp(152px, 20.4vw, 235px);
 }
 
+/*
+ * The dashboard renders at 110% with transform: scale, which behaves the same in
+ * every browser. Sizes are pre-divided by 1.1 so they fill the viewport once
+ * scaled. The shell is its own scroll container: sticky offsets are then worked
+ * out inside the scaled space, so the toolbar, sidebar and chat stay pinned.
+ */
 .dashboard-shell {
   width: calc(100vw / 1.1);
-  min-height: calc(100vh / 1.1);
+  height: calc(100dvh / 1.1);
+  overflow-x: hidden;
+  overflow-y: auto;
   transform: scale(1.1);
   transform-origin: top left;
 }
 
-/* Floats 12px off the viewport edges; height is pre-divided by the 1.1 scale. */
+/* Floats 12px off the viewport edges and stays put while the page scrolls. */
 .dashboard-sidebar-rail {
-  height: calc((100vh - 24px) / 1.1);
-  transform: scale(1.1);
-  transform-origin: top left;
+  top: calc(12px / 1.1);
+  height: calc((100dvh - 24px) / 1.1);
+  margin: calc(12px / 1.1) 0 0 calc(12px / 1.1);
 }
 
 .dashboard-sidebar-panel {
@@ -32,7 +40,7 @@
 }
 
 .dashboard-content {
-  padding-inline: clamp(20px, calc(2vw + 4px), 28px);
+  padding-inline: clamp(20px, calc(3.2vw + 4px), 52px);
 }
 
 .dashboard-toolbar {
@@ -44,12 +52,19 @@
   backdrop-filter: blur(10px);
 }
 
+/* Equal side columns keep the search centred in the toolbar. */
+@media (min-width: 640px) {
+  .dashboard-toolbar {
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, 484px) minmax(max-content, 1fr);
+  }
+}
+
 .dashboard-chat-dock {
   position: sticky;
   top: 0;
   align-self: flex-start;
   z-index: 20;
-  height: calc(100vh / 1.1);
+  height: calc(100dvh / 1.1);
   min-width: 0;
   flex-shrink: 0;
   overflow: hidden;
@@ -73,19 +88,51 @@
   background: rgb(243 81 119 / 70%);
 }
 
-.dashboard-toolbar-title {
-  font-size: clamp(16px, 1.9vw, 24px);
+.dashboard-title-bar {
+  min-height: 32px;
+  margin-block: clamp(4px, 0.6vw, 8px) clamp(16px, 1.8vw, 24px);
 }
 
-.dashboard-toolbar .dashboard-period-trigger,
-.dashboard-toolbar .dashboard-period-trigger [data-slot="select-value"] {
-  font-size: 10px;
-  font-weight: 600;
+.dashboard-page-title {
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.2;
+}
+
+.dashboard-period-trigger,
+.dashboard-filter-label {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* The clear button sits as far from the right edge as from the top and bottom. */
+.dashboard-search {
+  --search-height: clamp(28px, 3.1vw, 36px);
+  --search-action: clamp(18px, 2vw, 24px);
+  --search-icon: clamp(16px, 1.6vw, 18px);
+  --search-inset: calc((var(--search-height) - var(--search-action)) / 2);
+}
+
+.dashboard-search-input {
+  height: var(--search-height);
+  padding-left: calc(var(--search-inset) + 4px + var(--search-icon) + 6px);
+  padding-right: calc(var(--search-action) + var(--search-inset) * 2);
+}
+
+.dashboard-search-icon {
+  left: calc(var(--search-inset) + 4px);
+  width: var(--search-icon);
+  height: var(--search-icon);
+}
+
+.dashboard-search-action {
+  right: var(--search-inset);
+  width: var(--search-action);
+  height: var(--search-action);
 }
 
 .dashboard-grid {
   gap: clamp(20px, calc(2vw + 4px), 28px);
-  margin-top: clamp(4px, 1vw, 12px);
   padding-bottom: var(--space-6);
 }
 
@@ -199,7 +246,7 @@
 }
 
 .dashboard-secondary-card {
-  height: clamp(204px, calc(23.2vw + 25.8px), 293px);
+  height: clamp(236px, calc(26.4vw + 28px), 344px);
 }
 
 .dashboard-tertiary-card {
@@ -222,23 +269,42 @@
 }
 
 .dashboard-sales-metrics {
-  width: clamp(86px, 11.2vw, 129px);
+  --sales-dot: clamp(11px, 1.15vw, 14px);
+  --sales-gap: clamp(6px, 0.75vw, 10px);
+  width: clamp(104px, 13.6vw, 160px);
 }
 
 .dashboard-sales-metric {
-  min-height: clamp(47px, 6.1vw, 70px);
+  min-height: clamp(50px, 6.4vw, 74px);
+  gap: clamp(1px, 0.25vw, 3px);
+}
+
+.dashboard-sales-metric-head {
+  gap: var(--sales-gap);
+}
+
+.dashboard-sales-dot {
+  width: var(--sales-dot);
+  height: var(--sales-dot);
+  border: clamp(2px, 0.25vw, 3px) solid;
 }
 
 .dashboard-sales-value {
-  font-size: clamp(12px, 1.45vw, 17px);
+  font-size: clamp(15px, 1.9vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
+/* Indented so the label lines up under the value, not the dot. */
 .dashboard-sales-label {
+  padding-left: calc(var(--sales-dot) + var(--sales-gap));
   font-size: clamp(8px, 0.95vw, 11px);
+  line-height: 1.3;
 }
 
 .dashboard-earnings-chart {
-  height: clamp(180px, 21.8vw, 251px);
+  min-height: 0;
+  flex: 1;
   padding: var(--space-6) clamp(12px, 1.5vw, 16px) var(--space-4);
 }
 
@@ -248,22 +314,33 @@
 }
 
 .dashboard-product-row {
-  height: clamp(43px, 5vw, 58px);
-  gap: clamp(8px, 1vw, 12px);
+  gap: clamp(10px, 1.1vw, 14px);
+  padding-block: clamp(6px, 0.75vw, 9px);
 }
 
 .dashboard-product-image {
-  width: clamp(34px, 4.4vw, 51px);
-  height: clamp(34px, 4.4vw, 51px);
+  width: clamp(32px, 3.9vw, 46px);
+  height: clamp(32px, 3.9vw, 46px);
+}
+
+.dashboard-product-badge {
+  width: clamp(17px, 1.8vw, 21px);
+  height: clamp(17px, 1.8vw, 21px);
+  font-size: clamp(9px, 0.9vw, 11px);
+}
+
+.dashboard-product-text {
+  gap: clamp(3px, 0.45vw, 6px);
 }
 
 .dashboard-product-name {
   font-size: clamp(10px, 1.2vw, 14px);
-  line-height: 1.35;
+  line-height: 1.25;
 }
 
 .dashboard-product-detail {
   font-size: clamp(9px, 1vw, 12px);
+  line-height: 1.25;
 }
 
 .dashboard-product-purchases,
@@ -289,12 +366,17 @@
 }
 
 .dashboard-category-donut {
-  width: clamp(124px, 16.2vw, 186px);
-  height: clamp(124px, 16.2vw, 186px);
+  width: min(100%, clamp(116px, 15vw, 180px));
+  aspect-ratio: 1;
 }
 
 .dashboard-category-hole {
-  inset: clamp(34px, 4.4vw, 51px);
+  inset: 27.5%;
+}
+
+/* The donut owns the left half; the legend starts after a gap in the right half. */
+.dashboard-category-legend {
+  padding-left: clamp(8px, 1.6vw, 24px);
 }
 
 .dashboard-category-legend-item {
@@ -302,7 +384,8 @@
   gap: clamp(8px, 1vw, 12px);
 }
 
-.dashboard-category-label {
+.dashboard-category-label,
+.dashboard-category-share {
   font-size: clamp(10px, 1.2vw, 14px);
 }
 

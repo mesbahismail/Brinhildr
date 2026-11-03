@@ -1,3 +1,16 @@
+const periodScale: Record<string, number> = {
+  "Last 24 Hours": 0.32,
+  Yesterday: 0.3,
+  "Last Week": 0.48,
+  "Last 90 Days": 1.08,
+  "Last Year": 1.24,
+};
+
+/** How much the demo chart data grows or shrinks for a date filter; Last Month is the baseline. */
+export function periodMultiplier(period: string) {
+  return periodScale[period] ?? 1;
+}
+
 export function downloadCsv(
   filename: string,
   headers: string[],

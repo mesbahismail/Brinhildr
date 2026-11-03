@@ -4,7 +4,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -12,36 +11,41 @@ import {
 import "./dashboard.css";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CardMenu } from "@/components/dashboard/card-menu";
+import { ChartFrame } from "@/components/dashboard/chart-frame";
+import { periodMultiplier } from "@/lib/dashboard-utils";
 
+// Chart values are in hundreds of dollars; profits are earnings minus expenses.
 const sales = [
-  { date: "1 APR", earning: 20, orders: 14, visitors: 9 },
-  { date: "4 APR", earning: 23, orders: 16, visitors: 12 },
-  { date: "7 APR", earning: 25, orders: 19, visitors: 13 },
-  { date: "10 APR", earning: 22, orders: 17, visitors: 10 },
-  { date: "14 APR", earning: 27, orders: 20, visitors: 14 },
-  { date: "17 APR", earning: 28, orders: 20, visitors: 16 },
-  { date: "21 APR", earning: 26, orders: 22, visitors: 11 },
-  { date: "24 APR", earning: 30, orders: 25, visitors: 18 },
-  { date: "28 APR", earning: 27, orders: 21, visitors: 15 },
+  { date: "1 APR", earnings: 20, expenses: 12 },
+  { date: "4 APR", earnings: 23, expenses: 14 },
+  { date: "7 APR", earnings: 25, expenses: 15 },
+  { date: "10 APR", earnings: 22, expenses: 14 },
+  { date: "14 APR", earnings: 27, expenses: 16 },
+  { date: "17 APR", earnings: 28, expenses: 17 },
+  { date: "21 APR", earnings: 26, expenses: 15 },
+  { date: "24 APR", earnings: 30, expenses: 18 },
+  { date: "28 APR", earnings: 27, expenses: 16 },
 ];
 
 const metrics = [
-  { label: "Earnings", color: "#2fe4c0", value: "$31.221" },
-  { label: "Earnings", color: "#ffc04c", value: "$31.221" },
-  { label: "Earnings", color: "#f35177", value: "$31.221" },
-];
+  { key: "earnings", label: "Earnings", color: "#2fe4c0", total: 31221 },
+  { key: "expenses", label: "Expenses", color: "#ffc04c", total: 18540 },
+  { key: "profits", label: "Profits", color: "#f35177", total: 12681 },
+] as const;
 
 const ticks = ["$3k", "$2.5k", "$2k", "$1.5k", "$1k", "$500", "$0"];
 
+function formatDollars(value: number) {
+  return `$${Math.round(value).toLocaleString("en-US")}`;
+}
+
 export function SalesChart({ period }: { period: string }) {
-  const multiplier =
-    period === "Today" ? 0.32 : period === "Last Week" ? 0.48 : period === "Last 90 Days" ? 1.08 : period === "Last Year" ? 1.24 : 1;
-  const chartData = sales.map((point) => ({
-    ...point,
-    earning: Math.round(point.earning * multiplier),
-    orders: Math.round(point.orders * multiplier),
-    visitors: Math.round(point.visitors * multiplier),
-  }));
+  const multiplier = periodMultiplier(period);
+  const chartData = sales.map((point) => {
+    const earnings = Math.round(point.earnings * multiplier);
+    const expenses = Math.round(point.expenses * multiplier);
+    return { date: point.date, earnings, expenses, profits: earnings - expenses };
+  });
 
   return (
     <Card className="dark dashboard-sales-card min-w-0 gap-0 border-white/[.06] bg-gradient-to-br from-[#292929] to-[#222] p-0 shadow-[0_14px_35px_rgba(0,0,0,.13)]">
@@ -49,12 +53,12 @@ export function SalesChart({ period }: { period: string }) {
         <CardTitle className="dashboard-card-title font-medium">Sales</CardTitle>
         <CardMenu
           filename="brinhildr-sales.csv"
-          headers={["Date", "Earnings", "Orders", "Visitors"]}
-          rows={chartData.map(({ date, earning, orders, visitors }) => [
+          headers={["Date", "Earnings", "Expenses", "Profits"]}
+          rows={chartData.map(({ date, earnings, expenses, profits }) => [
             date,
-            earning,
-            orders,
-            visitors,
+            earnings * 100,
+            expenses * 100,
+            profits * 100,
           ])}
         />
       </div>
@@ -62,38 +66,35 @@ export function SalesChart({ period }: { period: string }) {
         <div className="dashboard-sales-metrics flex shrink-0 flex-col justify-center">
           {metrics.map((metric, index) => (
             <div
-              key={metric.color}
-              className={`dashboard-sales-metric flex items-center gap-[clamp(6px,.8vw,9px)] ${
+              key={metric.key}
+              className={`dashboard-sales-metric flex min-w-0 flex-col justify-center ${
                 index < metrics.length - 1 ? "border-b border-white/10" : ""
               }`}
             >
-              <span
-                className="size-3 shrink-0 rounded-full border-2"
-                style={{ borderColor: metric.color }}
-              />
-              <div className="min-w-0">
-                <div className="dashboard-sales-value leading-4 font-semibold text-white">{metric.value}</div>
-                <div className="dashboard-sales-label leading-3 text-white/45">{metric.label}</div>
+              <div className="dashboard-sales-metric-head flex items-center">
+                <span
+                  className="dashboard-sales-dot shrink-0 rounded-full"
+                  style={{ borderColor: metric.color }}
+                />
+                <span className="dashboard-sales-value truncate font-semibold tabular-nums text-white">
+                  {formatDollars(metric.total * multiplier)}
+                </span>
               </div>
+              <span className="dashboard-sales-label truncate text-white/45">{metric.label}</span>
             </div>
           ))}
         </div>
         <div className="min-w-0 flex-1 pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
+          <ChartFrame>
+            {({ width, height }) => (
+            <AreaChart width={width} height={height} data={chartData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
               <defs>
-                <linearGradient id="sales-earnings" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2fe4c0" stopOpacity={0.46} />
-                  <stop offset="100%" stopColor="#2fe4c0" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="sales-orders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffc04c" stopOpacity={0.42} />
-                  <stop offset="100%" stopColor="#ffc04c" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="sales-visitors" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f35177" stopOpacity={0.48} />
-                  <stop offset="100%" stopColor="#f35177" stopOpacity={0.02} />
-                </linearGradient>
+                {metrics.map((metric) => (
+                  <linearGradient key={metric.key} id={`sales-${metric.key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={metric.color} stopOpacity={0.45} />
+                    <stop offset="100%" stopColor={metric.color} stopOpacity={0.02} />
+                  </linearGradient>
+                ))}
               </defs>
               <CartesianGrid stroke="rgba(255,255,255,.09)" vertical />
               <XAxis
@@ -111,7 +112,7 @@ export function SalesChart({ period }: { period: string }) {
                 tick={{ fill: "rgba(255,255,255,.5)", fontSize: 10, fontWeight: 600 }}
                 tickLine={false}
                 axisLine={false}
-                width={30}
+                width={36}
                 tickMargin={4}
               />
               <Tooltip
@@ -122,33 +123,23 @@ export function SalesChart({ period }: { period: string }) {
                   fontSize: 10,
                 }}
                 labelStyle={{ color: "#fff" }}
+                formatter={(value) => formatDollars(Number(value) * 100)}
               />
-              <Area
-                type="monotone"
-                dataKey="earning"
-                stroke="#2fe4c0"
-                strokeWidth={1.5}
-                fill="url(#sales-earnings)"
-                animationDuration={650}
-              />
-              <Area
-                type="monotone"
-                dataKey="orders"
-                stroke="#ffc04c"
-                strokeWidth={1.5}
-                fill="url(#sales-orders)"
-                animationDuration={650}
-              />
-              <Area
-                type="monotone"
-                dataKey="visitors"
-                stroke="#f35177"
-                strokeWidth={1.5}
-                fill="url(#sales-visitors)"
-                animationDuration={650}
-              />
+              {metrics.map((metric) => (
+                <Area
+                  key={metric.key}
+                  type="monotone"
+                  dataKey={metric.key}
+                  name={metric.label}
+                  stroke={metric.color}
+                  strokeWidth={1.5}
+                  fill={`url(#sales-${metric.key})`}
+                  animationDuration={650}
+                />
+              ))}
             </AreaChart>
-          </ResponsiveContainer>
+            )}
+          </ChartFrame>
         </div>
       </div>
     </Card>

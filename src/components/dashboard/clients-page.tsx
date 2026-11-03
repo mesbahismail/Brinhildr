@@ -21,7 +21,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { PagePagination } from "@/components/dashboard/extra-pages";
-import { panelCard, StatCard } from "@/components/dashboard/page-kit";
+import { PageTitleBar, panelCard, StatCard } from "@/components/dashboard/page-kit";
 
 export const clientStatuses = ["VIP", "Active", "New", "Inactive"] as const;
 type ClientStatus = (typeof clientStatuses)[number];
@@ -123,14 +123,14 @@ export function ClientsPage({
 
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <Button
           onClick={() => setCreateOpen((open) => !open)}
           className="h-8 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-3 text-xs text-white"
         >
           <Plus className="size-3.5" /> New
         </Button>
-      </div>
+      </PageTitleBar>
       {createOpen && (
         <form onSubmit={createClient} className="mb-4 flex items-center gap-2 rounded-xl border border-white/[.08] bg-[#222] p-3">
           <Input aria-label="New client name" autoFocus value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Client name" className="h-9 max-w-sm border-white/[.12] bg-[#191919] text-sm" />

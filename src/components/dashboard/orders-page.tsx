@@ -17,6 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PageTitleBar } from "@/components/dashboard/page-kit";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -66,7 +67,7 @@ export function OrdersPage({
 
   return (
     <section className="dashboard-orders-page">
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <div className="flex items-center gap-2">
           <Button
             className="h-8 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-3 text-xs text-white hover:brightness-110"
@@ -76,7 +77,7 @@ export function OrdersPage({
             New
           </Button>
         </div>
-      </div>
+      </PageTitleBar>
 
       <Card className="dashboard-orders-table gap-0 overflow-hidden border-white/[.08] bg-gradient-to-br from-[#292929] to-[#222] p-0">
         <div className="dashboard-orders-table-scroll overflow-x-auto">
@@ -202,7 +203,7 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
 
   return (
     <section className="dashboard-order-detail">
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="h-8 rounded-full border-white/20 bg-transparent px-3 text-xs text-white/80">
             <Pencil className="size-3.5" />
@@ -213,7 +214,7 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
             Download
           </Button>
         </div>
-      </div>
+      </PageTitleBar>
 
       <div className="grid grid-cols-1 gap-5 min-[900px]:grid-cols-2">
         <Card className="flex min-h-[440px] flex-col gap-0 border-white/[.08] bg-gradient-to-br from-[#292929] to-[#222] p-0">

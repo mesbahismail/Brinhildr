@@ -1,5 +1,6 @@
 "use client";
 
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -86,4 +87,33 @@ export function SectionTitle({ title, children }: { title: string; children?: Re
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return <p className="rounded-2xl border border-dashed border-white/10 py-12 text-center text-sm text-white/50">{children}</p>;
+}
+
+type PageHeading = {
+  title: ReactNode;
+  leading?: ReactNode;
+  filter?: ReactNode;
+};
+
+/** The dashboard shell provides the page title and filter; pages add their own actions. */
+export const PageHeadingContext = createContext<PageHeading>({ title: null });
+
+export function PageTitleBar({ children }: { children?: ReactNode }) {
+  const { title, leading, filter } = useContext(PageHeadingContext);
+  return (
+    <div className="dashboard-title-bar flex flex-wrap items-center gap-x-4 gap-y-3">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        {leading}
+        <h1 className="dashboard-page-title truncate font-semibold tracking-[-.025em] text-white">
+          {title}
+        </h1>
+      </div>
+      {(filter || children) && (
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          {filter}
+          {children}
+        </div>
+      )}
+    </div>
+  );
 }

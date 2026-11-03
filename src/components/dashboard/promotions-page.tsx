@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { EmptyState, panelCard, SectionTitle, StatCard, Switch } from "@/components/dashboard/page-kit";
+import { EmptyState, PageTitleBar, panelCard, SectionTitle, StatCard, Switch } from "@/components/dashboard/page-kit";
 
 export const promotionStatuses = ["Active", "Scheduled", "Paused", "Expired", "Draft"] as const;
 type PromotionStatus = (typeof promotionStatuses)[number];
@@ -107,14 +107,14 @@ export function PromotionsPage({
 
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
+      <PageTitleBar>
         <Button
           onClick={() => setCreateOpen((open) => !open)}
           className="h-8 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-3 text-xs text-white"
         >
           <Plus className="size-3.5" /> New
         </Button>
-      </div>
+      </PageTitleBar>
       {createOpen && (
         <form onSubmit={createPromotion} className="mb-4 flex items-center gap-2 rounded-xl border border-white/[.08] bg-[#222] p-3">
           <Input aria-label="New promotion name" autoFocus value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Promotion name" className="h-9 max-w-sm border-white/[.12] bg-[#191919] text-sm" />

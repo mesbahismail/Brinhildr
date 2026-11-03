@@ -7,7 +7,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -31,6 +30,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardMenu } from "@/components/dashboard/card-menu";
+import { ChartFrame } from "@/components/dashboard/chart-frame";
 import { createTextPdf, downloadBlob } from "@/lib/dashboard-utils";
 import "./dashboard.css";
 
@@ -187,8 +187,9 @@ function ChatChart() {
         />
       </div>
       <div className="h-[clamp(200px,24vw,300px)] px-3 pb-4">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={yearlySales} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
+        <ChartFrame>
+          {({ width, height }) => (
+          <AreaChart width={width} height={height} data={yearlySales} margin={{ top: 10, right: 16, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="ai-chat-sales" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#2fe4c0" stopOpacity={0.42} />
@@ -235,7 +236,8 @@ function ChatChart() {
               animationDuration={650}
             />
           </AreaChart>
-        </ResponsiveContainer>
+          )}
+        </ChartFrame>
       </div>
     </div>
   );
@@ -518,32 +520,32 @@ export function AIChatPage() {
         <div className="dashboard-ai-thread">
           {messages.length === 0 ? (
             <div className="flex min-h-full flex-col items-center justify-center py-8">
-              <div className="mb-6 flex size-[clamp(88px,9vw,128px)] items-center justify-center rounded-full bg-gradient-to-br from-[#ff8866] to-[#f04479] shadow-[0_0_48px_rgba(243,81,119,.5),0_0_110px_rgba(243,81,119,.22)]">
+              <div className="mb-5 flex size-[clamp(60px,6vw,84px)] items-center justify-center rounded-full bg-gradient-to-br from-[#ff8866] to-[#f04479] shadow-[0_0_32px_rgba(243,81,119,.45),0_0_72px_rgba(243,81,119,.2)]">
                 <Bot className="size-[45%] text-white" strokeWidth={1.8} />
               </div>
-              <h2 className="mb-[clamp(28px,4vw,56px)] text-center text-[clamp(20px,2.4vw,30px)] font-medium text-white">
+              <h2 className="mb-[clamp(24px,3vw,40px)] text-center text-[clamp(18px,2vw,26px)] font-medium text-white">
                 Hi, how can I help you today?
               </h2>
-              <div className="grid w-full grid-cols-1 gap-[clamp(12px,1.6vw,22px)] min-[900px]:grid-cols-2">
+              <div className="grid w-full max-w-[800px] grid-cols-1 gap-[clamp(10px,1.2vw,16px)] min-[900px]:grid-cols-2">
                 {prompts.map(({ icon: Icon, title, subtitle, message }) => (
                   <button
                     key={title}
                     type="button"
                     onClick={() => send(message)}
-                    className="dashboard-ai-panel group flex items-center gap-[clamp(12px,1.4vw,18px)] rounded-[20px] border border-white/[.06] bg-gradient-to-br from-[#2c2c2c] to-[#232323] p-[clamp(10px,1.2vw,16px)] text-left shadow-[0_14px_35px_rgba(0,0,0,.2)] transition-colors hover:border-white/[.14]"
+                    className="dashboard-ai-panel group flex items-center gap-[clamp(10px,1.1vw,14px)] rounded-2xl border border-white/[.06] bg-gradient-to-br from-[#2c2c2c] to-[#232323] p-[clamp(8px,.9vw,12px)] text-left shadow-[0_14px_35px_rgba(0,0,0,.2)] transition-colors hover:border-white/[.14]"
                   >
-                    <span className="flex size-[clamp(56px,6vw,84px)] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4a4a4a] to-[#2e2e2e] shadow-[inset_0_1px_0_rgba(255,255,255,.08)]">
-                      <Icon className="size-[45%] text-white/75" strokeWidth={2.2} />
+                    <span className="flex size-[clamp(40px,3.8vw,52px)] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4a4a4a] to-[#2e2e2e] shadow-[inset_0_1px_0_rgba(255,255,255,.08)]">
+                      <Icon className="size-[42%] text-white/75" strokeWidth={2} />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[clamp(13px,1.3vw,16px)] font-semibold text-white">
+                      <span className="block text-[clamp(12px,1.1vw,14px)] font-semibold text-white">
                         {title}
                       </span>
-                      <span className="mt-1 block text-[clamp(10px,.95vw,12px)] leading-snug text-white/55">
+                      <span className="mt-0.5 block text-[clamp(10px,.85vw,11px)] leading-snug text-white/55">
                         {subtitle}
                       </span>
                     </span>
-                    <ChevronRight className="size-5 shrink-0 text-white/50 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
+                    <ChevronRight className="size-4 shrink-0 text-white/50 transition-transform group-hover:translate-x-0.5 group-hover:text-white" />
                   </button>
                 ))}
               </div>

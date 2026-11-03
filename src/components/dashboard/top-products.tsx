@@ -65,15 +65,15 @@ export function TopProducts({ searchTerm }: { searchTerm: string }) {
                 }}
                 aria-hidden="true"
               >
-                <span className="absolute -bottom-1 -left-1 flex size-[15px] items-center justify-center rounded-full border border-[#292929] bg-[#f35177] text-[8px] font-semibold text-white">
+                <span className="dashboard-product-badge absolute -bottom-1.5 -left-1.5 flex items-center justify-center rounded-full border-2 border-[#272727] bg-gradient-to-br from-[#f04479] to-[#ff8866] font-bold leading-none text-white shadow-[0_2px_8px_rgba(240,68,121,.45)]">
                   {index + 1}
                 </span>
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="dashboard-product-text flex min-w-0 flex-1 flex-col justify-center">
                 <div className="dashboard-product-name truncate text-white/90">
                   {product.name}
                 </div>
-                <div className="dashboard-product-detail leading-3 text-white/45">{product.price}</div>
+                <div className="dashboard-product-detail text-white/45">{product.price}</div>
               </div>
               <div className="dashboard-product-purchases shrink-0 text-right text-white/90">
                 {product.purchases} Purchases

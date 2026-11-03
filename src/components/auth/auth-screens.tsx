@@ -208,10 +208,18 @@ export function LoginScreen() {
             autoComplete="current-password"
             placeholder="Enter your password"
           />
-          <label className="flex w-fit items-center gap-2.5 text-[13px] text-white/75">
-            <input type="checkbox" name="remember" className="size-4 accent-[#f35177]" />
-            Save my info
-          </label>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex w-fit items-center gap-2.5 text-[13px] text-white/75">
+              <input type="checkbox" name="remember" className="size-4 accent-[#f35177]" />
+              Save my info
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-[13px] font-medium text-white/75 underline-offset-4 hover:text-[#ff9aa9] hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </AuthCard>
       </div>
     </AuthShell>
@@ -255,6 +263,95 @@ export function SignupScreen() {
             I agree to the Terms and Privacy Policy
           </label>
         </AuthCard>
+      </div>
+    </AuthShell>
+  );
+}
+
+export function ForgotPasswordScreen() {
+  const [sentTo, setSentTo] = useState("");
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSentTo(String(new FormData(event.currentTarget).get("email") ?? ""));
+  }
+
+  return (
+    <AuthShell>
+      <div className="flex w-full flex-1 flex-col items-center justify-center gap-10 py-12">
+        <Wordmark />
+        <section className="w-full max-w-[540px] rounded-[28px] border border-white/[.07] bg-gradient-to-br from-[#363636] to-[#2a2a2a] px-[clamp(20px,4.4vw,40px)] pb-10 pt-11 shadow-[0_40px_80px_rgba(0,0,0,.45)]">
+          {sentTo ? (
+            <div className="text-center" aria-live="polite">
+              <h1 className="text-[30px] font-medium">Check your email</h1>
+              <p className="mx-auto mt-3 max-w-[360px] text-[13px] leading-relaxed text-white/65">
+                If an account exists for <span className="font-medium text-white">{sentTo}</span>, we’ve
+                sent a link to reset your password. The link expires after one hour.
+              </p>
+              <div className="mt-9 space-y-4">
+                <Link href="/login" className={primaryButton}>
+                  Back to login
+                </Link>
+                <button type="button" className={outlineButton} onClick={() => setSentTo("")}>
+                  Use a different email
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-center text-[30px] font-medium">Reset password</h1>
+              <p className="mx-auto mb-8 mt-3 max-w-[360px] text-center text-[13px] leading-relaxed text-white/65">
+                Enter the email you use for Brinhildr and we’ll send you a link to choose a new password.
+              </p>
+              <form onSubmit={submit} className="space-y-8">
+                <UnderlineField
+                  label="Email Address"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                />
+                <button type="submit" className={primaryButton}>
+                  Send reset link
+                </button>
+              </form>
+              <p className="mt-8 text-center text-[13px] text-white/75">
+                Remembered it?{" "}
+                <Link href="/login" className="font-medium text-white underline underline-offset-4 hover:text-[#ff9aa9]">
+                  Back to login
+                </Link>
+              </p>
+            </>
+          )}
+        </section>
+      </div>
+    </AuthShell>
+  );
+}
+
+export function NotFoundScreen() {
+  const router = useRouter();
+
+  return (
+    <AuthShell>
+      <div className="flex w-full flex-1 flex-col items-center justify-center py-12 text-center">
+        <BrandMark className="w-[clamp(64px,6vw,88px)]" />
+        <p className="mt-8 bg-gradient-to-r from-[#e2346f] via-[#f35177] to-[#ff9966] bg-clip-text text-[clamp(72px,9vw,120px)] font-bold leading-none tracking-[-.04em] text-transparent">
+          404
+        </p>
+        <h1 className="mt-4 text-[clamp(22px,2.2vw,30px)] font-medium">Page not found</h1>
+        <p className="mt-2 max-w-[400px] text-[13px] leading-relaxed text-white/60">
+          The page you’re looking for doesn’t exist or has moved. Check the address, or head back to your
+          dashboard.
+        </p>
+        <div className="mt-10 grid w-full max-w-[440px] gap-4 sm:grid-cols-2">
+          <Link href="/" className={primaryButton}>
+            Go to dashboard
+          </Link>
+          <button type="button" className={outlineButton} onClick={() => router.back()}>
+            Go back
+          </button>
+        </div>
       </div>
     </AuthShell>
   );

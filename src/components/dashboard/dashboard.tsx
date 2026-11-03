@@ -65,6 +65,7 @@ import { ClientsPage, clientStatuses } from "@/components/dashboard/clients-page
 import { HelpPage } from "@/components/dashboard/help-page";
 import { PromotionsPage, promotionStatuses } from "@/components/dashboard/promotions-page";
 import { SettingsPage } from "@/components/dashboard/settings-page";
+import { PageHeadingContext, PageTitleBar } from "@/components/dashboard/page-kit";
 import {
   globalSearchItems,
   InventoryPage,
@@ -92,7 +93,22 @@ type DateRange = {
   end: Date | null;
 };
 
-const datePresets = ["Today", "Last Week", "Last Month", "Last 90 Days", "Last Year"];
+type DateFilter = {
+  period: string;
+  range: DateRange;
+};
+
+const datePresets = [
+  "Last 24 Hours",
+  "Yesterday",
+  "Last Week",
+  "Last Month",
+  "Last 90 Days",
+  "Last Year",
+];
+
+const filterPillClass =
+  "dashboard-period-trigger h-8 gap-1.5 rounded-full border-white/[.2] bg-[#242424] px-3 text-white/85 hover:bg-white/[.08] data-[popup-open]:bg-white/[.08]";
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -118,7 +134,9 @@ function dateId(date: Date) {
 
 function getPresetRange(preset: string): DateRange {
   const today = startOfDay(new Date());
-  if (preset === "Today") return { start: today, end: today };
+  const yesterday = addDays(today, -1);
+  if (preset === "Last 24 Hours") return { start: yesterday, end: today };
+  if (preset === "Yesterday") return { start: yesterday, end: yesterday };
   if (preset === "Last Week") return { start: addDays(today, -6), end: today };
   if (preset === "Last 90 Days") return { start: addDays(today, -89), end: today };
   if (preset === "Last Year") {
@@ -133,6 +151,15 @@ function getPresetRange(preset: string): DateRange {
     start: lastMonth,
     end: new Date(today.getFullYear(), today.getMonth(), 0),
   };
+}
+
+/**
+ * The left month of the dual view: a range ending in a past month opens on that
+ * month (with the next beside it); otherwise the range's last month sits on the right.
+ */
+function firstVisibleMonth(range: DateRange, today: Date) {
+  const endMonth = startOfMonth(range.end ?? range.start ?? today);
+  return endMonth < startOfMonth(today) ? endMonth : addMonths(endMonth, -1);
 }
 
 function formatDate(date: Date) {
@@ -150,7 +177,8 @@ function CalendarMonth({
   onSelect,
   onPrevious,
   onNext,
-  markedDates,
+  previousClassName = "",
+  nextClassName = "",
 }: {
   month: Date;
   range: DateRange;
@@ -158,7 +186,8 @@ function CalendarMonth({
   onSelect: (date: Date) => void;
   onPrevious: () => void;
   onNext: () => void;
-  markedDates?: Set<string>;
+  previousClassName?: string;
+  nextClassName?: string;
 }) {
   // Weeks start on Monday; neighbouring months fill the first and last rows.
   const leadingDays = (startOfMonth(month).getDay() + 6) % 7;
@@ -177,7 +206,7 @@ function CalendarMonth({
           type="button"
           variant="outline"
           size="icon-xs"
-          className="rounded-full border-white/25 bg-transparent text-white/70 hover:bg-white/[.08] hover:text-white"
+          className={`rounded-full border-white/25 bg-transparent text-white/70 hover:bg-white/[.08] hover:text-white ${previousClassName}`}
           aria-label={`Previous month, from ${monthLabel}`}
           onClick={onPrevious}
         >
@@ -188,7 +217,7 @@ function CalendarMonth({
           type="button"
           variant="outline"
           size="icon-xs"
-          className="rounded-full border-white/25 bg-transparent text-white/70 hover:bg-white/[.08] hover:text-white"
+          className={`rounded-full border-white/25 bg-transparent text-white/70 hover:bg-white/[.08] hover:text-white ${nextClassName}`}
           aria-label={`Next month, from ${monthLabel}`}
           onClick={onNext}
         >
@@ -205,18 +234,20 @@ function CalendarMonth({
           </span>
         ))}
         {days.map((date) => {
+          // Overflow days stay muted so a range never shows twice across the two months.
           const outside = date.getMonth() !== month.getMonth();
           const selected =
-            (range.start && dateId(date) === dateId(range.start)) ||
-            (range.end && dateId(date) === dateId(range.end));
+            !outside &&
+            ((range.start && dateId(date) === dateId(range.start)) ||
+              (range.end && dateId(date) === dateId(range.end)));
           const inRange =
+            !outside &&
             range.start &&
             range.end &&
             date >= range.start &&
             date <= range.end &&
             !selected;
           const isToday = dateId(date) === dateId(today);
-          const marked = markedDates?.has(dateId(date));
 
           return (
             <button
@@ -224,9 +255,7 @@ function CalendarMonth({
               type="button"
               onClick={() => onSelect(date)}
               aria-pressed={Boolean(selected)}
-              aria-label={`${new Intl.DateTimeFormat("en", {
-                dateStyle: "full",
-              }).format(date)}${marked ? ", has events" : ""}`}
+              aria-label={new Intl.DateTimeFormat("en", { dateStyle: "full" }).format(date)}
               className={`relative mx-auto flex size-8 items-center justify-center rounded-full border text-[11px] transition-colors ${
                 selected
                   ? "border-transparent bg-gradient-to-br from-[#f04479] to-[#ff8866] font-semibold text-white shadow-[0_4px_14px_rgba(240,68,121,.35)]"
@@ -235,17 +264,9 @@ function CalendarMonth({
                     : `border-transparent hover:bg-white/[.08] hover:text-white ${
                         outside ? "text-white/30" : "text-white/80"
                       }`
-              } ${isToday && !selected && !inRange ? "border-[#f35177]/60" : ""}`}
+              } ${isToday && !outside && !selected && !inRange ? "border-[#f35177]/60" : ""}`}
             >
               {date.getDate()}
-              {marked && (
-                <span
-                  aria-hidden="true"
-                  className={`absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full ${
-                    selected ? "bg-white" : "bg-[#f35177]"
-                  }`}
-                />
-              )}
             </button>
           );
         })}
@@ -254,60 +275,59 @@ function CalendarMonth({
   );
 }
 
+/**
+ * Dual-month range picker with presets on the right. The toolbar opens it from
+ * the "Filter by" pill and from the calendar icon; both edit the same filter.
+ */
 function DateRangePicker({
-  period,
+  filter,
   onApply,
+  variant = "pill",
 }: {
-  period: string;
-  onApply: (period: string, range: DateRange) => void;
+  filter: DateFilter;
+  onApply: (filter: DateFilter) => void;
+  variant?: "pill" | "icon";
 }) {
   const [open, setOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(() => new Date(2000, 0, 1));
   const [today, setToday] = useState(() => new Date(2000, 0, 1));
-  const [draftPeriod, setDraftPeriod] = useState(period);
-  const [appliedRange, setAppliedRange] = useState<DateRange>({ start: null, end: null });
-  const [draftRange, setDraftRange] = useState(appliedRange);
+  const [draft, setDraft] = useState(filter);
 
   function beginSelection(date: Date) {
     const selected = startOfDay(date);
-    setDraftPeriod("Custom");
-    setDraftRange((current) => {
-      if (!current.start || current.end || selected < current.start) {
-        return { start: selected, end: null };
-      }
-      return { start: current.start, end: selected };
-    });
+    setDraft(({ range }) => ({
+      period: "Custom",
+      range:
+        !range.start || range.end || selected < range.start
+          ? { start: selected, end: null }
+          : { start: range.start, end: selected },
+    }));
   }
 
   function choosePreset(preset: string) {
     const range = getPresetRange(preset);
-    setDraftPeriod(preset);
-    setDraftRange(range);
-    if (range.start) setVisibleMonth(startOfMonth(range.start));
+    setDraft({ period: preset, range });
+    setVisibleMonth(firstVisibleMonth(range, today));
   }
 
   function applyRange() {
-    if (!draftRange.start) return;
-    const completeRange = draftRange.end
-      ? draftRange
-      : { ...draftRange, end: draftRange.start };
-    setAppliedRange(completeRange);
-    onApply(draftPeriod, completeRange);
+    const { start, end } = draft.range;
+    if (!start) return;
+    onApply({ period: draft.period, range: { start, end: end ?? start } });
     setOpen(false);
   }
 
   function resetRange() {
-    const range = getPresetRange("Last Month");
-    setDraftPeriod("Last Month");
-    setDraftRange(range);
-    setAppliedRange(range);
-    if (range.start) setVisibleMonth(startOfMonth(range.start));
-    onApply("Last Month", range);
+    const reset = { period: "Last Month", range: getPresetRange("Last Month") };
+    setDraft(reset);
+    setVisibleMonth(firstVisibleMonth(reset.range, today));
+    onApply(reset);
   }
 
+  const { period, range } = filter;
   const label =
-    period === "Custom" && appliedRange.start && appliedRange.end
-      ? `${formatDate(appliedRange.start)} – ${formatDate(appliedRange.end)}`
+    period === "Custom" && range.start && range.end
+      ? `${formatDate(range.start)} – ${formatDate(range.end)}`
       : period;
 
   return (
@@ -316,43 +336,85 @@ function DateRangePicker({
       onOpenChange={(nextOpen) => {
         if (nextOpen) {
           const now = startOfDay(new Date());
-          const currentRange = period === "Custom" ? appliedRange : getPresetRange(period);
+          const currentRange = period === "Custom" ? range : getPresetRange(period);
           setToday(now);
-          setVisibleMonth(startOfMonth(currentRange.start ?? now));
-          setAppliedRange(currentRange);
-          setDraftPeriod(period);
-          setDraftRange(currentRange);
+          setVisibleMonth(firstVisibleMonth(currentRange, now));
+          setDraft({ period, range: currentRange });
         }
         setOpen(nextOpen);
       }}
     >
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="outline"
-            className="dashboard-period-trigger h-[30px] gap-1.5 rounded-full border-white/[.2] bg-[#242424] px-2.5 text-[10px] font-semibold text-white/90 hover:bg-white/[.08]"
-            aria-label={`Select date range, currently ${label}`}
-          />
-        }
-      >
-        <CalendarDays className="size-3.5 text-white/70" />
-        <span>{label}</span>
-        <ChevronDown className="size-3 text-white/60" />
-      </DropdownMenuTrigger>
+      {variant === "icon" ? (
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-white/65 hover:bg-white/[.08] hover:text-white data-[popup-open]:bg-white/[.08] data-[popup-open]:text-white"
+              aria-label={`Open calendar, showing ${label}`}
+            />
+          }
+        >
+          <CalendarDays className="size-4" />
+        </DropdownMenuTrigger>
+      ) : (
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="outline"
+              className={filterPillClass}
+              aria-label={`Select date range, currently ${label}`}
+            />
+          }
+        >
+          <CalendarDays className="size-[13px] text-white/60" />
+          <span>{label}</span>
+          <ChevronDown className="size-[11px] text-white/50" />
+        </DropdownMenuTrigger>
+      )}
       <DropdownMenuContent
         align="end"
         sideOffset={10}
-        className="w-[min(780px,calc(100vw-24px))] overflow-hidden rounded-3xl border border-white/[.08] bg-gradient-to-br from-[#2d2d2d] to-[#252525] p-0 text-white shadow-[0_30px_70px_rgba(0,0,0,.5)] ring-0"
+        className="w-[min(800px,calc(100vw-24px))] overflow-hidden rounded-3xl border border-white/[.08] bg-gradient-to-br from-[#2d2d2d] to-[#252525] p-0 text-white shadow-[0_30px_70px_rgba(0,0,0,.5)] ring-0"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-[170px_minmax(0,1fr)]">
-          <div className="flex overflow-x-auto border-b border-white/[.08] py-2 sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-r sm:py-4">
+        <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_176px]">
+          <div className="grid min-w-0 grid-cols-1 sm:grid-cols-2">
+            <div className="p-4 sm:p-5">
+              <CalendarMonth
+                month={visibleMonth}
+                range={draft.range}
+                today={today}
+                onSelect={beginSelection}
+                onPrevious={() => setVisibleMonth((month) => addMonths(month, -1))}
+                onNext={() => setVisibleMonth((month) => addMonths(month, 1))}
+                nextClassName="sm:invisible"
+              />
+            </div>
+            <div className="hidden border-l border-white/[.08] p-5 sm:block">
+              <CalendarMonth
+                month={addMonths(visibleMonth, 1)}
+                range={draft.range}
+                today={today}
+                onSelect={beginSelection}
+                onPrevious={() => setVisibleMonth((month) => addMonths(month, -1))}
+                onNext={() => setVisibleMonth((month) => addMonths(month, 1))}
+                previousClassName="invisible"
+              />
+            </div>
+          </div>
+          <div
+            role="group"
+            aria-label="Quick ranges"
+            className="order-first flex overflow-x-auto border-b border-white/[.08] py-2 sm:order-none sm:flex-col sm:overflow-visible sm:border-b-0 sm:border-l sm:py-4"
+          >
             {datePresets.map((preset) => (
               <button
                 key={preset}
                 type="button"
                 onClick={() => choosePreset(preset)}
+                aria-pressed={draft.period === preset}
                 className={`shrink-0 px-5 py-3 text-left text-[13px] transition-colors sm:w-full ${
-                  draftPeriod === preset
+                  draft.period === preset
                     ? "bg-gradient-to-r from-[#f04479] to-[#ff8866] font-medium text-white"
                     : "text-white/80 hover:bg-white/[.05] hover:text-white"
                 }`}
@@ -361,35 +423,13 @@ function DateRangePicker({
               </button>
             ))}
           </div>
-          <div className="grid min-w-0 grid-cols-1 sm:grid-cols-2">
-            <div className="p-4 sm:p-5">
-              <CalendarMonth
-                month={visibleMonth}
-                range={draftRange}
-                today={today}
-                onSelect={beginSelection}
-                onPrevious={() => setVisibleMonth((month) => addMonths(month, -1))}
-                onNext={() => setVisibleMonth((month) => addMonths(month, 1))}
-              />
-            </div>
-            <div className="hidden border-l border-white/[.08] p-5 sm:block">
-              <CalendarMonth
-                month={addMonths(visibleMonth, 1)}
-                range={draftRange}
-                today={today}
-                onSelect={beginSelection}
-                onPrevious={() => setVisibleMonth((month) => addMonths(month, -1))}
-                onNext={() => setVisibleMonth((month) => addMonths(month, 1))}
-              />
-            </div>
-          </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[.08] px-5 py-4">
           <div className="flex items-center gap-2 text-[11px] text-white/70">
             <CalendarDays className="size-4 text-white/55" />
-            {draftRange.start
-              ? `${draftPeriod === "Custom" ? "Custom range" : draftPeriod} ${formatNumericDate(draftRange.start)} – ${
-                  draftRange.end ? formatNumericDate(draftRange.end) : "select end date"
+            {draft.range.start
+              ? `${draft.period === "Custom" ? "Custom range" : draft.period} ${formatNumericDate(draft.range.start)} – ${
+                  draft.range.end ? formatNumericDate(draft.range.end) : "select end date"
                 }`
               : "Select a date range"}
           </div>
@@ -405,7 +445,7 @@ function DateRangePicker({
             <Button
               type="button"
               className="h-9 rounded-full bg-gradient-to-r from-[#f04479] to-[#ff8866] px-4 text-xs text-white shadow-[0_8px_20px_rgba(240,68,121,.3)] hover:brightness-110"
-              disabled={!draftRange.start}
+              disabled={!draft.range.start}
               onClick={applyRange}
             >
               <Check className="size-3.5" />
@@ -418,114 +458,62 @@ function DateRangePicker({
   );
 }
 
-const calendarEvents = [
-  { dayOffset: 0, time: "10:00", title: "Weekly sales review", color: "bg-[#2fe4c0]" },
-  { dayOffset: 0, time: "15:30", title: "Restock summer dresses", color: "bg-[#ff8866]" },
-  { dayOffset: 2, time: "09:00", title: "Flash sale goes live", color: "bg-[#f35177]" },
-  { dayOffset: 5, time: "12:00", title: "Seller payouts", color: "bg-[#2fe4c0]" },
-  { dayOffset: 9, time: "14:00", title: "Inventory audit", color: "bg-[#ff8866]" },
-  { dayOffset: 14, time: "11:00", title: "Promo campaign ends", color: "bg-[#f35177]" },
-];
+type HistoryNavigation = EventTarget & { canGoBack: boolean; canGoForward: boolean };
 
-function CalendarMenu() {
-  const [open, setOpen] = useState(false);
-  const [today, setToday] = useState(() => new Date(2000, 0, 1));
-  const [visibleMonth, setVisibleMonth] = useState(() => new Date(2000, 0, 1));
-  const [selectedDate, setSelectedDate] = useState(() => new Date(2000, 0, 1));
+function getHistoryNavigation() {
+  return (window as Window & { navigation?: HistoryNavigation }).navigation;
+}
 
-  const events = calendarEvents.map((event) => ({
-    ...event,
-    date: addDays(today, event.dayOffset),
-  }));
-  const markedDates = new Set(events.map((event) => dateId(event.date)));
-  const selectedEvents = events.filter(
-    (event) => dateId(event.date) === dateId(selectedDate),
-  );
+function subscribeToHistory(onChange: () => void) {
+  const navigation = getHistoryNavigation();
+  navigation?.addEventListener("currententrychange", onChange);
+  return () => navigation?.removeEventListener("currententrychange", onChange);
+}
+
+// Browsers without the Navigation API keep both buttons enabled.
+function getHistorySnapshot() {
+  const navigation = getHistoryNavigation();
+  return `${navigation?.canGoBack ?? true}:${navigation?.canGoForward ?? true}`;
+}
+
+function getServerHistorySnapshot() {
+  return "false:false";
+}
+
+function HistoryControls() {
+  const router = useRouter();
+  const [canGoBack, canGoForward] = useSyncExternalStore(
+    subscribeToHistory,
+    getHistorySnapshot,
+    getServerHistorySnapshot,
+  )
+    .split(":")
+    .map((value) => value === "true");
+  const buttonClass =
+    "flex w-[34px] items-center justify-center text-white/70 transition-colors hover:bg-white/[.08] hover:text-white focus-visible:bg-white/[.08] focus-visible:text-white focus-visible:outline-none disabled:pointer-events-none disabled:text-white/25";
 
   return (
-    <DropdownMenu
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) {
-          const now = startOfDay(new Date());
-          setToday(now);
-          setVisibleMonth(startOfMonth(now));
-          setSelectedDate(now);
-        }
-        setOpen(nextOpen);
-      }}
-    >
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-white/65 hover:bg-white/[.08] hover:text-white data-[popup-open]:bg-white/[.08] data-[popup-open]:text-white"
-            aria-label="Open calendar"
-          />
-        }
+    <div className="hidden h-[30px] shrink-0 items-stretch overflow-hidden rounded-full border border-white/[.2] bg-[#242424] sm:flex">
+      <button
+        type="button"
+        className={buttonClass}
+        aria-label="Go back"
+        disabled={!canGoBack}
+        onClick={() => router.back()}
       >
-        <CalendarDays className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        sideOffset={8}
-        className="w-[min(304px,calc(100vw-24px))] border-white/[.12] bg-[#252525] p-0 text-white shadow-2xl"
+        <ChevronLeft className="size-4" />
+      </button>
+      <span aria-hidden="true" className="w-px bg-white/[.16]" />
+      <button
+        type="button"
+        className={buttonClass}
+        aria-label="Go forward"
+        disabled={!canGoForward}
+        onClick={() => router.forward()}
       >
-        <div className="p-4 pb-3">
-          <CalendarMonth
-            month={visibleMonth}
-            range={{ start: selectedDate, end: selectedDate }}
-            today={today}
-            onSelect={(date) => setSelectedDate(startOfDay(date))}
-            onPrevious={() => setVisibleMonth((month) => addMonths(month, -1))}
-            onNext={() => setVisibleMonth((month) => addMonths(month, 1))}
-            markedDates={markedDates}
-          />
-        </div>
-        <div className="border-t border-white/[.08] px-4 py-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-white/90">
-              {new Intl.DateTimeFormat("en", {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-              }).format(selectedDate)}
-            </p>
-            {dateId(selectedDate) !== dateId(today) && (
-              <button
-                type="button"
-                className="text-[10px] font-medium text-[#ff9aa9] hover:text-white"
-                onClick={() => {
-                  setSelectedDate(today);
-                  setVisibleMonth(startOfMonth(today));
-                }}
-              >
-                Today
-              </button>
-            )}
-          </div>
-          {selectedEvents.length ? (
-            <ul className="space-y-1.5">
-              {selectedEvents.map((event) => (
-                <li
-                  key={`${event.title}-${event.time}`}
-                  className="flex items-center gap-2.5 rounded-lg bg-white/[.04] px-2.5 py-2"
-                >
-                  <span className={`h-6 w-1 shrink-0 rounded-full ${event.color}`} />
-                  <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-white/85">
-                    {event.title}
-                  </span>
-                  <span className="shrink-0 text-[10px] text-white/45">{event.time}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="py-1.5 text-[11px] text-white/45">Nothing scheduled.</p>
-          )}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <ChevronRight className="size-4" />
+      </button>
+    </div>
   );
 }
 
@@ -808,13 +796,13 @@ function StatusFilterMenu({
         render={
           <Button
             variant="outline"
-            className="dashboard-period-trigger h-[30px] gap-1.5 rounded-full border-white/[.2] bg-[#242424] px-3 text-[10px] font-semibold text-white/90 hover:bg-white/[.08]"
+            className={filterPillClass}
             aria-label={`Filter by status, currently ${value === "All" ? "all statuses" : value}`}
           />
         }
       >
         <span>{value === "All" ? "All statuses" : value}</span>
-        <ChevronDown className="size-3 text-white/60" />
+        <ChevronDown className="size-[11px] text-white/50" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={8} className="min-w-40 bg-[#252525] text-white">
         <DropdownMenuRadioGroup value={value} onValueChange={(next) => onChange(String(next))}>
@@ -1083,7 +1071,10 @@ export function Dashboard({
   orderId?: string;
 }) {
   const router = useRouter();
-  const [period, setPeriod] = useState("Last Month");
+  const [dateFilter, setDateFilter] = useState<DateFilter>({
+    period: "Last Month",
+    range: { start: null, end: null },
+  });
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -1112,6 +1103,36 @@ export function Dashboard({
         ? "Manufacturers"
         : currentSection;
 
+  const pageHeading = {
+    title: pageTitle,
+    leading:
+      page === "order" ? (
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-[clamp(26px,2.6vw,32px)] shrink-0 rounded-full border-white/20 bg-transparent text-white/80 hover:bg-white/[.07]"
+          onClick={() => router.push("/orders")}
+          aria-label="Back to orders"
+        >
+          <ArrowLeft className="size-3.5" />
+        </Button>
+      ) : null,
+    filter: hasFilter ? (
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="dashboard-filter-label hidden text-white/50 sm:inline">Filter by</span>
+        {page === "dashboard" ? (
+          <DateRangePicker filter={dateFilter} onApply={setDateFilter} />
+        ) : statusOptions ? (
+          <StatusFilterMenu options={statusOptions} value={statusFilter} onChange={setStatusFilter} />
+        ) : (
+          <Button variant="outline" className={filterPillClass}>
+            Latest
+          </Button>
+        )}
+      </div>
+    ) : null,
+  };
+
   function navigateSection(section: string) {
     if (section === "Logout") {
       setLogoutOpen(true);
@@ -1123,163 +1144,115 @@ export function Dashboard({
 
   return (
     <>
-      <aside
-        className={`dashboard-sidebar-rail fixed left-3 top-3 z-20 hidden sm:block ${
-          sidebarCollapsed ? "w-[72px]" : "dashboard-sidebar"
-        }`}
-      >
-        <Sidebar
-          activeSection={currentSection}
-          onNavigate={navigateSection}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((collapsed) => !collapsed)}
-        />
-      </aside>
-
       <div
-        className="dashboard-shell dark flex min-h-screen bg-[#151515] text-white"
+        className="dashboard-shell dark flex bg-[#151515] text-white"
         data-page={page}
         data-chat-open={chatOpen}
       >
-        <main
-          className={`min-w-0 flex-1 ${
-            sidebarCollapsed
-              ? "sm:ml-[calc(72px_+_12px/1.1)]"
-              : "sm:ml-[calc(clamp(152px,20.4vw,235px)_+_12px/1.1)]"
+        <aside
+          className={`dashboard-sidebar-rail sticky z-20 hidden shrink-0 self-start sm:block ${
+            sidebarCollapsed ? "w-[72px]" : "dashboard-sidebar"
           }`}
         >
-          <div className="dashboard-content mx-auto w-full max-w-[1600px]">
-          <header className="dashboard-toolbar flex flex-wrap items-center gap-[clamp(8px,1.3vw,16px)]">
-            <Sheet open={mobileNavigationOpen} onOpenChange={setMobileNavigationOpen}>
-              <SheetTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="sm:hidden"
-                    aria-label="Open navigation"
-                  />
-                }
-              >
-                <Menu className="size-4" />
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[240px] border-white/10 bg-[#191919] p-0">
-                <SheetTitle className="sr-only">Navigation</SheetTitle>
-                <Sidebar
-                  activeSection={currentSection}
-                  onNavigate={(section) => {
-                    navigateSection(section);
-                    setMobileNavigationOpen(false);
-                  }}
-                  mobile
-                />
-              </SheetContent>
-            </Sheet>
+          <Sidebar
+            activeSection={currentSection}
+            onNavigate={navigateSection}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed((collapsed) => !collapsed)}
+          />
+        </aside>
 
-            <div className="flex min-w-0 items-center gap-2 sm:mr-[clamp(0px,1.4vw,20px)] sm:max-w-[40%] sm:shrink-0">
-              {page === "order" && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-[clamp(24px,2.6vw,30px)] shrink-0 rounded-full border-white/20 bg-transparent text-white/80 hover:bg-white/[.07]"
-                  onClick={() => router.push("/orders")}
-                  aria-label="Back to orders"
+        <main className="min-w-0 flex-1">
+          <div className="dashboard-content w-full">
+          <header className="dashboard-toolbar flex flex-wrap items-center gap-[clamp(8px,1.3vw,16px)] sm:grid">
+            <div className="flex min-w-0 items-center gap-[clamp(8px,1vw,12px)]">
+              <Sheet open={mobileNavigationOpen} onOpenChange={setMobileNavigationOpen}>
+                <SheetTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="sm:hidden"
+                      aria-label="Open navigation"
+                    />
+                  }
                 >
-                  <ArrowLeft className="size-3.5" />
-                </Button>
-              )}
-              <h1 className="dashboard-toolbar-title truncate font-semibold tracking-[-.025em] text-white">
-                {pageTitle}
-              </h1>
+                  <Menu className="size-4" />
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[240px] border-white/10 bg-[#191919] p-0">
+                  <SheetTitle className="sr-only">Navigation</SheetTitle>
+                  <Sidebar
+                    activeSection={currentSection}
+                    onNavigate={(section) => {
+                      navigateSection(section);
+                      setMobileNavigationOpen(false);
+                    }}
+                    mobile
+                  />
+                </SheetContent>
+              </Sheet>
+
+              <HistoryControls />
             </div>
 
-            <div className="flex min-w-0 flex-1 items-center gap-[clamp(8px,1.3vw,16px)] max-sm:order-last max-sm:basis-full">
-              <div className="relative min-w-0 max-w-[clamp(316px,42vw,484px)] flex-1 max-sm:max-w-none">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-[14px] -translate-y-1/2 text-white/45" />
-                <Input
-                  placeholder={searchPlaceholder}
-                  aria-label={isOrdersPage ? "Search orders" : page === "sellers" ? "Search manufacturers" : "Search"}
-                  value={searchTerm}
-                  onFocus={() => setSearchOpen(Boolean(searchTerm))}
-                  onChange={(event) => {
-                    setSearchTerm(event.target.value);
-                    setSearchOpen(Boolean(event.target.value));
-                  }}
-                  className="h-[clamp(25px,3.2vw,37px)] rounded-full border-white/[.16] bg-[#242424] pl-[clamp(28px,3.6vw,42px)] pr-9 text-[clamp(9px,1.05vw,12px)] text-white placeholder:text-white/45 focus-visible:border-white/30 focus-visible:ring-0"
-                />
-                <button
-                  type="button"
-                  className="absolute right-1 top-1/2 flex size-[clamp(17px,2vw,23px)] -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-                  aria-label={searchTerm ? "Clear search" : "Show recent searches"}
-                  onClick={() => {
-                    if (searchTerm) {
-                      setSearchTerm("");
-                      setSearchOpen(false);
-                    } else {
-                      setSearchOpen((open) => !open);
-                    }
-                  }}
-                >
-                  {searchTerm ? <X className="size-3" /> : <ChevronDown className="size-3" />}
-                </button>
-                {searchOpen && searchTerm && (
-                  <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-white/[.12] bg-[#242424] py-1.5 shadow-2xl">
-                    {searchResults.length ? (
-                      searchResults.slice(0, 5).map(({ title, detail, href, icon: Icon }, index) => (
-                        <button
-                          key={`${href}-${title}-${index}`}
-                          type="button"
-                          className="flex w-full items-center gap-3 border-b border-white/[.06] px-3 py-2.5 text-left last:border-0 hover:bg-white/[.06]"
-                          onClick={() => {
-                            router.push(href);
-                            setSearchTerm("");
-                            setSearchOpen(false);
-                          }}
-                        >
-                          <Clock3 className="size-4 shrink-0 text-white/45" />
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-xs font-medium text-white/85">{title}</span>
-                            <span className="mt-0.5 block truncate text-[10px] text-white/45">{detail}</span>
-                          </span>
-                          <Icon className="size-3.5 shrink-0 text-white/35" />
-                        </button>
-                      ))
-                    ) : (
-                      <p className="px-3 py-4 text-center text-xs text-white/45">No matches found.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {hasFilter && (
-                <div className="ml-auto flex shrink-0 items-center gap-2">
-                  <span className="hidden text-[10px] font-semibold text-white/60 sm:inline">
-                    Filter by
-                  </span>
-                  {page === "dashboard" ? (
-                    <DateRangePicker
-                      period={period}
-                      onApply={(nextPeriod) => setPeriod(nextPeriod)}
-                    />
-                  ) : statusOptions ? (
-                    <StatusFilterMenu
-                      options={statusOptions}
-                      value={statusFilter}
-                      onChange={setStatusFilter}
-                    />
+            <div className="dashboard-search relative min-w-0 max-sm:order-last max-sm:basis-full">
+              <Search className="dashboard-search-icon pointer-events-none absolute top-1/2 -translate-y-1/2 text-white/50" />
+              <Input
+                placeholder={searchPlaceholder}
+                aria-label={isOrdersPage ? "Search orders" : page === "sellers" ? "Search manufacturers" : "Search"}
+                value={searchTerm}
+                onFocus={() => setSearchOpen(Boolean(searchTerm))}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                  setSearchOpen(Boolean(event.target.value));
+                }}
+                className="dashboard-search-input rounded-full border-white/[.16] bg-[#242424] text-white placeholder:text-white/45 focus-visible:border-white/30 focus-visible:ring-0"
+              />
+              <button
+                type="button"
+                className="dashboard-search-action absolute top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full border border-white/20 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label={searchTerm ? "Clear search" : "Show recent searches"}
+                onClick={() => {
+                  if (searchTerm) {
+                    setSearchTerm("");
+                    setSearchOpen(false);
+                  } else {
+                    setSearchOpen((open) => !open);
+                  }
+                }}
+              >
+                {searchTerm ? <X className="size-3" /> : <ChevronDown className="size-3" />}
+              </button>
+              {searchOpen && searchTerm && (
+                <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-white/[.12] bg-[#242424] py-1.5 shadow-2xl">
+                  {searchResults.length ? (
+                    searchResults.slice(0, 5).map(({ title, detail, href, icon: Icon }, index) => (
+                      <button
+                        key={`${href}-${title}-${index}`}
+                        type="button"
+                        className="flex w-full items-center gap-3 border-b border-white/[.06] px-3 py-2.5 text-left last:border-0 hover:bg-white/[.06]"
+                        onClick={() => {
+                          router.push(href);
+                          setSearchTerm("");
+                          setSearchOpen(false);
+                        }}
+                      >
+                        <Clock3 className="size-4 shrink-0 text-white/45" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-xs font-medium text-white/85">{title}</span>
+                          <span className="mt-0.5 block truncate text-[10px] text-white/45">{detail}</span>
+                        </span>
+                        <Icon className="size-3.5 shrink-0 text-white/35" />
+                      </button>
+                    ))
                   ) : (
-                    <Button
-                      variant="outline"
-                      className="h-[30px] rounded-full border-white/[.2] bg-[#242424] px-3 text-[10px] font-semibold text-white/90 hover:bg-white/[.08]"
-                    >
-                      Latest
-                    </Button>
+                    <p className="px-3 py-4 text-center text-xs text-white/45">No matches found.</p>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="ml-auto flex shrink-0 items-center gap-[clamp(4px,0.8vw,8px)]">
+            <div className="ml-auto flex shrink-0 items-center justify-end">
               <div className="flex items-center rounded-full border border-white/[.18] bg-[#242424] px-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -1326,17 +1299,21 @@ export function Dashboard({
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <span aria-hidden="true" className="h-4 w-px bg-white/[.14]" />
-                <CalendarMenu />
+                <DateRangePicker filter={dateFilter} onApply={setDateFilter} variant="icon" />
               </div>
             </div>
           </header>
 
+          <PageHeadingContext value={pageHeading}>
           {page === "order" && orderId ? (
             <OrderDetailPage orderId={orderId} />
           ) : isOrdersPage ? (
             <OrdersPage searchTerm={searchTerm} onCreate={() => router.push("/orders/1001")} />
           ) : page === "ai-chat" ? (
-            <AIChatPage />
+            <>
+              <PageTitleBar />
+              <AIChatPage />
+            </>
           ) : page === "inventory" ? (
             <InventoryPage searchTerm={searchTerm} />
           ) : page === "sellers" ? (
@@ -1346,11 +1323,18 @@ export function Dashboard({
           ) : page === "clients" ? (
             <ClientsPage searchTerm={searchTerm} statusFilter={statusFilter} />
           ) : page === "settings" ? (
-            <SettingsPage />
+            <>
+              <PageTitleBar />
+              <SettingsPage />
+            </>
           ) : page === "help" ? (
-            <HelpPage searchTerm={searchTerm} onOpenChat={() => setChatOpen(true)} />
+            <>
+              <PageTitleBar />
+              <HelpPage searchTerm={searchTerm} onOpenChat={() => setChatOpen(true)} />
+            </>
           ) : (
             <>
+              <PageTitleBar />
               <div
                 className="dashboard-grid grid grid-cols-1 min-[640px]:grid-cols-2"
                 onPointerMove={(event) => {
@@ -1359,21 +1343,24 @@ export function Dashboard({
                     '[data-slot="card"]',
                   );
                   if (!card) return;
+                  // Client coordinates include the 110% scale; the glow is drawn in the card's own pixels.
                   const bounds = card.getBoundingClientRect();
-                  card.style.setProperty("--pointer-x", `${event.clientX - bounds.left}px`);
-                  card.style.setProperty("--pointer-y", `${event.clientY - bounds.top}px`);
+                  const scale = card.offsetWidth / bounds.width;
+                  card.style.setProperty("--pointer-x", `${(event.clientX - bounds.left) * scale}px`);
+                  card.style.setProperty("--pointer-y", `${(event.clientY - bounds.top) * scale}px`);
                 }}
               >
                 <div className="min-[640px]:col-span-2">
-                  <SalesChart period={period} />
+                  <SalesChart period={dateFilter.period} />
                 </div>
-                <EarningsChart period={period} />
+                <EarningsChart period={dateFilter.period} />
                 <TopProducts searchTerm={searchTerm} />
                 <CountrySales />
                 <CategoryBreakdown />
               </div>
             </>
           )}
+          </PageHeadingContext>
           </div>
         </main>
         {page !== "ai-chat" && <ChatPanel open={chatOpen} onOpenChange={setChatOpen} />}
